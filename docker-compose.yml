@@ -1,0 +1,40 @@
+# ============================================================
+# Trading Journal — docker-compose.yml
+# Usage:
+#   docker compose up -d          (start)
+#   docker compose down           (stop)
+#   docker compose logs -f        (view logs)
+#   docker compose pull && docker compose up -d   (update)
+# ============================================================
+
+services:
+  journal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trading-journal
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:/app/data/journal.db
+      - NEXT_TELEMETRY_DISABLED=1
+    volumes:
+      # SQLite data persisted outside container (survives restarts/updates)
+      - journal_data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/webhooks/mt5"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  journal_data:
+    driver: local

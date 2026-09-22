@@ -1,0 +1,46 @@
+# Dependencies
+node_modules
+npm-debug.log*
+
+# Next.js build output
+.next
+out
+
+# Git
+.git
+.gitignore
+
+# Environment
+.env.local
+.env.production
+
+# Development files
+*.log
+*.md
+README*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode
+.idea
+*.swp
+
+# Test files
+__tests__
+*.test.*
+*.spec.*
+
+# SQLite (never bake DB into image — use volume)
+*.db
+*.db-shm
+*.db-wal
+prisma/dev.db
+
+# Misc
+.agents
+.claude
+.windsurf
+data/

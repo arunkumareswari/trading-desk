@@ -1,0 +1,109 @@
+// Trading Journal & Performance Analytics — data model
+// Journal entries (Trade) are the single source of truth; balances, equity,
+// and every analytics figure are computed on read from this table — never stored.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Account {
+  id              String   @id @default(cuid())
+  name            String
+  startingBalance Float
+  currency        String   @default("USD")
+  isDemo          Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  trades Trade[]
+}
+
+model Trade {
+  id        String   @id @default(cuid())
+  accountId String
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  // Trade information
+  date        DateTime
+  entryTime   String? // "HH:mm" — used to derive session + holding time
+  closingDate DateTime?
+  closingTime String? // "HH:mm"
+  symbol      String
+  side        String // "LONG" | "SHORT"
+  setup       String?
+  session     String? // "Asian" | "London" | "New York" | "London/New York Overlap" — derived from entryTime
+
+  entryPrice Float
+  stopLoss   Float?
+  takeProfit Float?
+  exitPrice  Float?
+  quantity   Float
+
+  // Financial (derived fields stored for cheap sort/filter — always recomputed from source fields on write)
+  pnl               Float  @default(0) // gross P&L
+  brokerageCharges  Float  @default(0)
+  netPnl            Float  @default(0) // pnl - brokerageCharges
+  riskAmount        Float? // Risk in $
+  riskPercent       Float? // Risk % of account
+  plannedRR         Float? // planned Risk:Reward from entry/stop/target
+  rMultiple         Float? // netPnl / riskAmount
+  result            String? // "WIN" | "LOSS" | "BREAKEVEN"
+
+  // Trade analysis
+  marketBias          String?
+  higherTimeframeBias String?
+  entryReason          String?
+  exitReason           String?
+  confirmation         String?
+  invalidation         String?
+  tradeManagement      String?
+  mistakeNotes         String?
+
+  // Psychology
+  emotionBefore   String?
+  emotionDuring   String?
+  emotionAfter    String?
+  confidenceLevel Int? // 1-10
+  disciplineScore Int? // 1-10
+
+  // Journal
+  preTradeThesis String?
+  whatHappened   String?
+  whatWentRight  String?
+  whatWentWrong  String?
+  lessonLearned  String?
+  screenshotUrl  String?
+  notes          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  mistakes TradeMistake[]
+
+  @@index([accountId, date])
+  @@index([accountId, closingDate])
+  @@index([symbol])
+  @@index([setup])
+}
+
+model Mistake {
+  id       String  @id @default(cuid())
+  name     String  @unique
+  isCustom Boolean @default(false)
+
+  trades TradeMistake[]
+}
+
+model TradeMistake {
+  id        String  @id @default(cuid())
+  tradeId   String
+  trade     Trade   @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  mistakeId String
+  mistake   Mistake @relation(fields: [mistakeId], references: [id], onDelete: Cascade)
+
+  @@unique([tradeId, mistakeId])
+}
