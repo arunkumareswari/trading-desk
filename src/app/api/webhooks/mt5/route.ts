@@ -48,6 +48,12 @@ interface MT5TradePayload {
 interface WebhookBody {
   apiToken?: string;
   accountId?: string;
+  accountName?: string;
+  accountLogin?: string | number;
+  startingBalance?: number;
+  balance?: number;
+  currency?: string;
+  isDemo?: boolean;
   action?: "PING" | "SYNC_TRADES" | "TEST";
   trades?: MT5TradePayload[];
   trade?: MT5TradePayload;
@@ -109,9 +115,10 @@ export async function POST(req: NextRequest) {
     if (!account) {
       const accounts = await db.account.findMany();
       account =
-        accounts.find((a) => a.id.toLowerCase() === token.toLowerCase()) ||
-        accounts.find((a) => a.name.toLowerCase() === token.toLowerCase()) ||
-        accounts.find((a) => a.name.includes(token));
+        accounts.find((a) => a.id.toLowerCase() === token.toLowerCase()) ??
+        accounts.find((a) => a.name.toLowerCase() === token.toLowerCase()) ??
+        accounts.find((a) => a.name.includes(token)) ??
+        null;
     }
 
     // Auto-create workspace for this MT5 account if not found
