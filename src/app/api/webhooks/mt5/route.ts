@@ -104,22 +104,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Resolve Account
+    // Resolve Account (or Auto-Create if first time syncing this MT5 account)
     let account = await db.account.findUnique({ where: { id: token } });
     if (!account) {
-      // Fallback: check if token matches first account or part of ID
       const accounts = await db.account.findMany();
       account =
         accounts.find((a) => a.id.toLowerCase() === token.toLowerCase()) ||
         accounts.find((a) => a.name.toLowerCase() === token.toLowerCase()) ||
-        accounts[0];
+        accounts.find((a) => a.name.includes(token));
     }
 
+    // Auto-create workspace for this MT5 account if not found
     if (!account) {
-      return NextResponse.json(
-        { success: false, error: "No account found matching token" },
-        { status: 404 }
-      );
+      const accountName = body.accountName || `MT5 Account #${body.accountLogin || token}`;
+      const startingBalance = Number(body.startingBalance || body.balance || 5000);
+      const currency = body.currency || "USD";
+      const isDemo = Boolean(body.isDemo);
+
+      account = await db.account.create({
+        data: {
+          name: accountName,
+          startingBalance,
+          currency,
+          isDemo,
+        },
+      });
+      console.log(`✨ Auto-created new Trading Journal workspace: "${account.name}" (ID: ${account.id})`);
     }
 
     // Handle Ping / Connection Health Check
