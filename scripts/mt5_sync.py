@@ -19,7 +19,6 @@ import sys
 # CONFIGURATION — Fill your details here
 # ==========================================
 JOURNAL_WEBHOOK_URL = "http://34.46.109.224:3000/api/webhooks/mt5"  # Google Cloud VM Webhook URL
-ACCOUNT_TOKEN       = "TD-ACC-5PCD6R"                         # Your Account Token from Settings (Dhinesh)
 
 # Optional: Auto-login to specific MT5 account (leave as None if MT5 is already logged in)
 MT5_LOGIN    = None       # e.g., 51234567 (integer) or None
@@ -45,7 +44,6 @@ def init_mt5():
     print("=" * 60)
     print("🚀 Initializing MetaTrader 5 Python Direct Sync Bridge...")
     print(f"📡 Webhook URL: {JOURNAL_WEBHOOK_URL}")
-    print(f"🔑 Account Token: {ACCOUNT_TOKEN}")
     print("=" * 60)
 
     if MT5_LOGIN and MT5_PASSWORD and MT5_SERVER:
@@ -145,8 +143,8 @@ def sync_deals():
     is_demo = (getattr(account_info, "trade_mode", 1) == 0)
 
     payload = {
-        "apiToken": ACCOUNT_TOKEN,   # ← Existing account ID (TD-ACC-5PCD6R = "Dhinesh")
-        "accountId": ACCOUNT_TOKEN,
+        "apiToken": account_login,    # MT5 Login Number = unique identifier per account
+        "accountId": account_login,   # e.g. "51234567" — auto-creates workspace if new
         "accountLogin": account_login,
         "accountName": account_name,
         "startingBalance": balance,
