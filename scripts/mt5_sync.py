@@ -19,7 +19,7 @@ import sys
 # CONFIGURATION — Fill your details here
 # ==========================================
 JOURNAL_WEBHOOK_URL = "http://34.46.109.224:3000/api/webhooks/mt5"  # Google Cloud VM Webhook URL
-ACCOUNT_TOKEN       = "cmu2vhxgh0000ekceeaqtrvq8"             # Your Account Token from Settings
+ACCOUNT_TOKEN       = "TD-ACC-5PCD6R"                         # Your Account Token from Settings (Dhinesh)
 
 # Optional: Auto-login to specific MT5 account (leave as None if MT5 is already logged in)
 MT5_LOGIN    = None       # e.g., 51234567 (integer) or None
@@ -145,8 +145,8 @@ def sync_deals():
     is_demo = (getattr(account_info, "trade_mode", 1) == 0)
 
     payload = {
-        "apiToken": account_login,
-        "accountId": account_login,
+        "apiToken": ACCOUNT_TOKEN,   # ← Existing account ID (TD-ACC-5PCD6R = "Dhinesh")
+        "accountId": ACCOUNT_TOKEN,
         "accountLogin": account_login,
         "accountName": account_name,
         "startingBalance": balance,

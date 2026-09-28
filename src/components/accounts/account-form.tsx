@@ -28,9 +28,11 @@ import type { Account } from "@/generated/prisma/client";
 export function AccountForm({
   account,
   onSuccess,
+  footerLeft,
 }: {
   account?: Account;
   onSuccess: (accountId: string) => void;
+  footerLeft?: React.ReactNode;
 }) {
   const [openCurrency, setOpenCurrency] = useState(false);
 
@@ -226,7 +228,8 @@ export function AccountForm({
             </FormItem>
           )}
         />
-        <DialogFooter>
+        <DialogFooter className="justify-between">
+          <div>{footerLeft}</div>
           <Button type="submit" disabled={form.formState.isSubmitting}>
             {account ? "Save Changes" : "Create Account"}
           </Button>

@@ -114,11 +114,13 @@ export async function POST(req: NextRequest) {
     let account = await db.account.findUnique({ where: { id: token } });
     if (!account) {
       const accounts = await db.account.findMany();
+      const cleanToken = token.replace(/^td-acc-/i, "").toLowerCase();
       account =
         accounts.find((a) => a.id.toLowerCase() === token.toLowerCase()) ??
         accounts.find((a) => a.name.toLowerCase() === token.toLowerCase()) ??
-        accounts.find((a) => a.name.includes(token)) ??
-        null;
+        accounts.find((a) => a.id.toLowerCase().endsWith(cleanToken)) ??
+        accounts.find((a) => a.name.toLowerCase().includes(token.toLowerCase())) ??
+        (accounts.length === 1 ? accounts[0] : null);
     }
 
     // Auto-create workspace for this MT5 account if not found
